@@ -1,0 +1,22 @@
+ {
+   "id": integer,
+   "title": string,
+   "body": string,
+   "createDate": datetime,
+   "updateDate": datetime,
+   "user_id": integer,
+   "comments": [
+				{
+					"id": integer,
+					"text": string,
+					"postedDate": datetime,
+					"user": integer
+				},
+				{
+					"id": integer,
+					"text": string,
+					"postedDate": datetime,
+					"user": integer
+				}
+			   ]
+}

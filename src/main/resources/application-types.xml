@@ -1,0 +1,290 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="users" format="json">
+      <types:shape format="weave" example="examples/users.json"><![CDATA[%dw 2.0
+
+type users = Array<{|  id: Number {"typeId": "int"},   login: String,   password: String,   active: Boolean,   roles: String|}> {"example": "[{\\\"id\\\":1,\\\"login\\\":\\\"admin\\\",\\\"password\\\":\\\"admin\\\",\\\"active\\\":true,\\\"roles\\\":\\\"ADMIN\\\"}]"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="categories" format="json">
+      <types:shape format="weave" example="examples/categories.json"><![CDATA[%dw 2.0
+
+type categories = Array<{|  id: Number {"typeId": "int"},   name: String|}> {"example": "[{\\\"id\\\":1,\\\"name\\\":\\\"Business\\\"},{\\\"id\\\":2,\\\"name\\\":\\\"IT\\\"}]"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="posts" format="json">
+      <types:shape format="weave" example="examples/posts.json"><![CDATA[%dw 2.0
+
+type posts = {|
+  id: Number {"typeId": "int"}, 
+  title: String, 
+  body: String, 
+  createDate: String, 
+  updateDate: String, 
+  user_id: Number {"typeId": "int"}, 
+  comments: Array<{|    id: Number {"typeId": "int"},     text: String,     postedDate: String,     user: Number {"typeId": "int"}  |}>
+|} {"example": "{\\\"id\\\":1,\\\"title\\\":\\\"????\\\",\\\"body\\\":\\\"????\\\",\\\"createDate\\\":\\\"????\\\",\\\"updateDate\\\":\\\"????\\\",\\\"user_id\\\":1,\\\"comments\\\":[{\\\"id\\\":1,\\\"text\\\":\\\"????\\\",\\\"postedDate\\\":\\\"????\\\",\\\"user\\\":1},{\\\"id\\\":2,\\\"text\\\":\\\"????\\\",\\\"postedDate\\\":\\\"????\\\",\\\"user\\\":2}]}"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="comments" format="json">
+      <types:shape format="weave" example="examples/comments.json"><![CDATA[%dw 2.0
+
+type comments = Array<{|  id: Number {"typeId": "int"},   text: String,   postedDate: String,   postId: Number {"typeId": "int"},   userId: Number {"typeId": "int"}|}> {"example": "[{\\\"id\\\":1,\\\"text\\\":\\\"test comment\\\",\\\"postedDate\\\":\\\"2020-01-29T08:24:30.000+0000\\\",\\\"postId\\\":2,\\\"userId\\\":1},{\\\"id\\\":2,\\\"text\\\":\\\"test comment\\\",\\\"postedDate\\\":\\\"2020-01-29T08:24:30.000+0000\\\",\\\"postId\\\":3,\\\"userId\\\":2}]"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="accounts" format="json">
+      <types:shape format="weave" example="examples/users-1.json"><![CDATA[%dw 2.0
+
+type accounts = Array<{|  id: Number {"typeId": "int"},   login: String,   password: String,   active: Boolean,   roles: String|}> {"example": "[{\\\"id\\\":1,\\\"login\\\":\\\"admin\\\",\\\"password\\\":\\\"admin\\\",\\\"active\\\":true,\\\"roles\\\":\\\"ADMIN\\\"}]"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="postsN" format="json">
+      <types:shape format="weave" example="examples/postN.json"><![CDATA[%dw 2.0
+
+type postsN = Array<{|  id: Number {"typeId": "int"},   title: String,   body: String,   createDate: String,   updateDate: String,   user_id: Number {"typeId": "int"},   comments: Array<{|    id: Number {"typeId": "int"},     text: String,     postedDate: String,     user: Number {"typeId": "int"}  |}>
+|}> {"example": "[{\\\"id\\\":1,\\\"title\\\":\\\"????\\\",\\\"body\\\":\\\"????\\\",\\\"createDate\\\":\\\"????\\\",\\\"updateDate\\\":\\\"????\\\",\\\"user_id\\\":1,\\\"comments\\\":[{\\\"id\\\":1,\\\"text\\\":\\\"????\\\",\\\"postedDate\\\":\\\"????\\\",\\\"user\\\":1},{\\\"id\\\":2,\\\"text\\\":\\\"????\\\",\\\"postedDate\\\":\\\"????\\\",\\\"user\\\":2}]},{\\\"id\\\":1,\\\"title\\\":\\\"????\\\",\\\"body\\\":\\\"????\\\",\\\"createDate\\\":\\\"????\\\",\\\"updateDate\\\":\\\"????\\\",\\\"user_id\\\":1,\\\"comments\\\":[{\\\"id\\\":1,\\\"text\\\":\\\"????\\\",\\\"postedDate\\\":\\\"????\\\",\\\"user\\\":1},{\\\"id\\\":2,\\\"text\\\":\\\"????\\\",\\\"postedDate\\\":\\\"????\\\",\\\"user\\\":2}]}]"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#41b810b0-4d9e-4693-8790-1f4cc9ba0c5a">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="users"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#85de1234-e2c0-4dfd-bb00-bcd31b4c61d7">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="users"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#dd6fe24b-44ce-4b77-840b-b6299af226e0">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="categories"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#c5f49644-ed10-4f6d-b6c6-26d0c1f34132">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="categories"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#f711211d-ecb0-47b2-9d54-7c91bb5019dd">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="posts"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#73400bc7-1749-4d66-b83a-24be64e8c0f3">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="posts"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#be6d347d-95f6-457e-bd90-9c27eb505c80">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="comments"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#a6cb4840-33f6-4931-8321-f6967558de34">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="comments"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#ba3a4c23-6c42-4b74-ac6b-1c4cdaecd3cc">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="accounts"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#f3e7d5dc-daac-4d48-811f-e6ba70dad31a">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="posts"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#c258b917-4e98-4d22-a454-6fbe52157d46">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="posts"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#5d2c115c-9d6e-4cb2-b44f-ad390751b025">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="comments"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#a2855593-930f-45cd-a33d-1890bc3761d6">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="comments"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#ab0c15db-47b4-49e4-9555-7f7399236101">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="users"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#9fab0608-088f-4f9c-ad0d-ec9e991697ee">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="users"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#198d19c1-e766-4c98-823f-d3f419f2a197">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="postsN"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#9816fd95-5f08-4916-9d48-a50e9a8b58b9">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="postsN"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#e2c6bd86-bd72-4284-85aa-39b6de46c99e">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="categories"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#3f1f3453-8eb6-496b-bf60-16feb6098b36">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="categories"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#f8cf7b19-ae4b-46a6-ac26-71248e348bf0">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="comments"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#06b3ae38-59c4-4378-8d8c-d1cb47cc5b5c">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="comments"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#a5e180f3-2ea1-43de-932f-ac481e874a93">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="accounts"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#2d91bb4c-6ac5-4519-ae61-e644eece0229">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="postsN"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#8bf529d7-d281-46b8-b240-d094011af78d">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="postsN"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#6679bb8c-6f4d-45bf-bb9b-7298820865ac">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="comments"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#82fa2adb-448f-4cda-9fa6-c2951597a8c0">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="comments"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>

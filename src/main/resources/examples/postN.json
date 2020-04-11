@@ -1,0 +1,46 @@
+[
+	 {
+   "id": 1,
+   "title": "????",
+   "body": "????",
+   "createDate": "????",
+   "updateDate": "????",
+   "user_id": 1,
+   "comments": [
+				{
+					"id": 1,
+					"text": "????",
+					"postedDate": "????",
+					"user": 1
+				},
+				{
+					"id": 2,
+					"text": "????",
+					"postedDate": "????",
+					"user": 2
+				}
+			   ]
+		},
+		 {
+   "id": 1,
+   "title": "????",
+   "body": "????",
+   "createDate": "????",
+   "updateDate": "????",
+   "user_id": 1,
+   "comments": [
+				{
+					"id": 1,
+					"text": "????",
+					"postedDate": "????",
+					"user": 1
+				},
+				{
+					"id": 2,
+					"text": "????",
+					"postedDate": "????",
+					"user": 2
+				}
+			   ]
+}
+]

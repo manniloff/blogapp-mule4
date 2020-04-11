@@ -1,0 +1,381 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:java="http://www.mulesoft.org/schema/mule/java" 
+xmlns:spring="http://www.mulesoft.org/schema/mule/spring" 
+xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" 
+xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" 
+xmlns:db="http://www.mulesoft.org/schema/mule/db" 
+xmlns="http://www.mulesoft.org/schema/mule/core" 
+xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" 
+xmlns:http="http://www.mulesoft.org/schema/mule/http" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd"> 
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="d8c6d93f-01ed-451a-80fc-7a51390e7f18" >
+		<db:my-sql-connection host="${db.host}" port="${db.port}" user="${db.user}" password="${db.password}" database="${db.database}" />
+	</db:config>
+	<spring:config name="springConfig" files="beans.xml"/>
+	<flow name="testFlow" doc:id="31b58903-6109-4a56-92b9-4a69982b1877" >
+		<java:invoke doc:name="Invoke" doc:id="ef0d197c-8434-49ed-b76e-35831118e312" instance="user" class="com.mule.User" method="getDetails()"/>
+		<logger level="INFO" doc:name="Logger" doc:id="83fa7e9f-02c0-4886-98c4-0d9eb7ab094b" />
+		<ee:transform doc:name="Transform Message" doc:id="584b0afc-5549-4ec0-9337-aaee42ba77ac" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getUsersFlow" doc:id="6f43de82-8ada-4eea-8e25-77d98a88c06c" >
+		<db:select doc:name="Select" doc:id="ed1fcb2e-7f2f-4b62-a3fa-e7366f53d79e" config-ref="Database_Config">
+			<db:sql >SELECT * 
+FROM user</db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="ab0c15db-47b4-49e4-9555-7f7399236101" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	id: payload01.id,
+	login: payload01.login,
+	password: payload01.password,
+	active: payload01.active,
+	roles: payload01.role
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getUserByIdFlow" doc:id="0f058762-716d-449b-aa05-b93aaa009b1e" >
+		<db:select doc:name="Select" doc:id="f7400062-af4e-453a-8a4d-7b62088c7719" config-ref="Database_Config">
+			<db:sql >Select * 
+From user
+Where id = #[flowVars.id]</db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="9fab0608-088f-4f9c-ad0d-ec9e991697ee" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	id: payload01.id,
+	login: payload01.login,
+	password: payload01.password,
+	active: payload01.active,
+	roles: payload01.role
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="postUserFlow" doc:id="e1e4d17d-3633-4f46-abbf-fb93b95dd513" >
+		<db:insert doc:name="Insert" doc:id="cd1047b8-62fc-4845-ab04-b4f7f5d6826a" config-ref="Database_Config">
+			<db:sql >Insert into user (login, password, active, role)
+values (#[json:login],#[json:password], true,'USER')</db:sql>
+		</db:insert>
+		<set-payload value="User #[json:login],was added" doc:name="Set Payload" doc:id="f3ba42b6-f054-47a0-b27e-5b9e15bc7724" />
+	</flow>
+	<flow name="putUserFlow" doc:id="1c63f808-fdf5-466f-834d-8927c27090ec" >
+		<db:update doc:name="Update" doc:id="be6701f1-f0ac-40dc-8ad7-d9f9e7df7848" config-ref="Database_Config">
+			<db:sql >update user set login = #[json:login] and passwod = #[json:password] and role = #[json:roles] and active = #[json:active]
+where id = (select id from user where login = #[json:login])</db:sql>
+		</db:update>
+		<set-payload value="User was updated" doc:name="Set Payload" doc:id="fc879c7a-0a29-43e7-820b-dc4b4aa61456" />
+	</flow>
+	<flow name="deleteUserByIdFlow" doc:id="29727857-ac67-4e92-949c-cd5c46e805d0" >
+		<db:delete doc:name="Delete" doc:id="b03212fe-4d5b-4ddc-9c3b-d4e7a3fc75ec" config-ref="Database_Config">
+			<db:sql >Delete from user where id = #[flowVars.id];</db:sql>
+		</db:delete>
+		<set-payload value="User with id - #[flowVars.id] was deleted!" doc:name="Set Payload" doc:id="d6c2e9c0-82fc-4655-8c02-065bcdf05c5a" />
+	</flow>
+	<flow name="getCategoriesFlow" doc:id="ba90497a-0fc2-4461-a251-64dc3275c9f1" >
+		<db:select doc:name="Select" doc:id="592051ff-a4e2-4eb1-97ff-d0b4338ecbc6" config-ref="Database_Config">
+			<db:sql >SELECT *
+FROM category</db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="e2c6bd86-bd72-4284-85aa-39b6de46c99e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	id: payload01.id,
+	name: payload01.name default ""
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getCategoryByIdFlow" doc:id="b1e66ed0-3da6-4f20-9fdf-5fbea5f04474" >
+		<db:select doc:name="Select" doc:id="afdc08b4-0c17-44cf-8247-cedb604e33b4" config-ref="Database_Config">
+			<db:sql >SELECT *
+FROM category where id = #[flowVars.id]</db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="3f1f3453-8eb6-496b-bf60-16feb6098b36" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	id: payload01.id,
+	name: payload01.name default ""
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="postCategoryFlow" doc:id="b2ceb408-c564-4e20-9791-630e33a60fc4" >
+		<db:insert doc:name="Insert" doc:id="2ac6b64a-3916-4845-83fb-80f9aedcaa9d" config-ref="Database_Config">
+			<db:sql >Insert into category (name) values (#[json:name])</db:sql>
+		</db:insert>
+		<set-payload value="Category #[json:name], was added;" doc:name="Set Payload" doc:id="b9291038-74e1-4cfb-a7ab-1fefc01e376a" />
+	</flow>
+	<flow name="deleteCategoryByIdFlow" doc:id="50249406-abe1-4c51-b8c3-96cd9e8d1e71" >
+		<db:delete doc:name="Delete" doc:id="5fd5e51b-89a6-4546-82c4-33b114ea91f0" config-ref="Database_Config">
+			<db:sql >Delete from category where id = #[flowVars.id]</db:sql>
+		</db:delete>
+		<set-payload value="Catigory with id - #[flowVars.id]" doc:name="Set Payload" doc:id="1761ecb9-6561-497a-b9fc-c5e015c89275" />
+	</flow>
+	<flow name="getPostsFlow" doc:id="212895d4-500c-4430-b7e1-c84560e398d3" >
+		<db:select doc:name="Select" doc:id="0277c9fb-2148-46ee-908e-78fbf9084002" config-ref="Database_Config">
+			<db:sql >Select p.*,c.id as comment_id, c.posted_date,c.text
+From 5p0mOyk8Fu.post p , 5p0mOyk8Fu.comment c 
+Where p.id = c.post_id</db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="198d19c1-e766-4c98-823f-d3f419f2a197" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	id: payload01.id,
+	title: payload01.title,
+	body: payload01.body,
+	createDate: payload01.create_date as String default "",
+	updateDate: payload01.update_date as String default "",
+	user_id: payload01.user_id,
+	comments: [{
+		id: payload01.comment_id,
+		text: payload01.text default "",
+		postedDate: payload01.posted_date as String default ""
+	}]
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getPostByIdFlow" doc:id="3f027462-9b09-4e83-88fb-67786db75666" >
+		<db:select doc:name="Select" doc:id="4bbd9658-397a-42ec-ae63-992fcfd4886f" config-ref="Database_Config">
+			<db:sql >Select p.*,c.id as comment_id, c.posted_date,c.text
+From 5p0mOyk8Fu.post p , 5p0mOyk8Fu.comment c 
+Where p.id = c.post_id and p.id = #[flowVars.id];</db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="9816fd95-5f08-4916-9d48-a50e9a8b58b9" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	id: payload01.id,
+	title: payload01.title,
+	body: payload01.body,
+	createDate: payload01.create_date as String default "",
+	updateDate: payload01.update_date as String default "",
+	user_id: payload01.user_id,
+	comments: [{
+		id: payload01.comment_id,
+		text: payload01.text default "",
+		postedDate: payload01.posted_date as String default ""
+	}]
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getCommentsFlow" doc:id="559e74a6-6b96-487e-a2fd-d296cc237d16" >
+		<db:select doc:name="Select" doc:id="c36ab5ee-3c95-4151-8692-c3b0cc3870f6" config-ref="Database_Config">
+			<db:sql >Select *
+From comment;</db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="f8cf7b19-ae4b-46a6-ac26-71248e348bf0" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	id: payload01.id,
+	text: payload01.text default "",
+	postedDate: payload01.posted_date as String default "",
+	postId: payload01.post_id,
+	userId: payload01.user_id
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getCommentByIdFlow" doc:id="4ed590db-5fcd-4c3d-a9a0-5b109611714d" >
+		<db:select doc:name="Select" doc:id="111c373b-03c8-42ae-9154-4cecad52377c" config-ref="Database_Config">
+			<db:sql >Select *
+from comment
+Where id = #[flowVars.id]</db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="06b3ae38-59c4-4378-8d8c-d1cb47cc5b5c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	id: payload01.id,
+	text: payload01.text default "",
+	postedDate: payload01.posted_date as String default "",
+	postId: payload01.post_id,
+	userId: payload01.user_id
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getAccountsFlow" doc:id="e9aee25f-88eb-4c7f-b145-42b25bfd8f6b" >
+		<db:select doc:name="Select" doc:id="11a942a3-4939-4752-9d83-095d7ca57ce7" config-ref="Database_Config">
+			<db:sql >Select * from user where id = 1;</db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="a5e180f3-2ea1-43de-932f-ac481e874a93" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	id: payload01.id,
+	login: payload01.login,
+	password: payload01.password,
+	active: payload01.active,
+	roles: payload01.role
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="putAccountsFlow" doc:id="58e87403-bd9b-41c2-8de4-5864b63285fd" >
+		<db:update doc:name="Update" doc:id="bf10b16f-d1b4-425a-b06c-6c9799605083" >
+			<db:sql >update user set login = #[json:login] and passwod = #[json:password]
+where id = (select id from user where login = #[json:login])</db:sql>
+		</db:update>
+		<set-payload value="User was updated" doc:name="Set Payload" doc:id="d771457b-67f2-4030-9198-8e79d0c544bf" />
+	</flow>
+	<flow name="getAccountsPostsFlow" doc:id="b028c408-44c4-4d13-a188-0423f7b1f95d" >
+		<db:select doc:name="Select" doc:id="9e713da4-9bb0-4c3b-9bc2-20973275f7c2" config-ref="Database_Config">
+			<db:sql >Select p.*,c.id as comment_id, c.posted_date,c.text
+From 5p0mOyk8Fu.post p , 5p0mOyk8Fu.comment c 
+Where p.id = c.post_id and p.user_id = 1;</db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="2d91bb4c-6ac5-4519-ae61-e644eece0229" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	id: payload01.id,
+	title: payload01.title,
+	body: payload01.body,
+	createDate: payload01.create_date as String default "",
+	updateDate: payload01.update_date as String default "",
+	user_id: payload01.user_id,
+	comments: [{
+		id: payload01.comment_id,
+		text: payload01.text default "",
+		postedDate: payload01.posted_date as String default ""
+	}]
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getAccountsPostByIdFlow" doc:id="813fe248-9c5a-4404-9d54-f546cc9a75c5" >
+		<db:select doc:name="Select" doc:id="80b3e1f9-5897-4eec-8572-3c6c409757cb" config-ref="Database_Config">
+			<db:sql >Select p.*,c.id as comment_id, c.posted_date,c.text
+From 5p0mOyk8Fu.post p , 5p0mOyk8Fu.comment c 
+Where p.id = c.post_id and p.user_id = 1 and p.id = #[flowVars.id];</db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="8bf529d7-d281-46b8-b240-d094011af78d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	id: payload01.id,
+	title: payload01.title,
+	body: payload01.body,
+	createDate: payload01.create_date as String default "",
+	updateDate: payload01.update_date as String default "",
+	user_id: payload01.user_id,
+	comments: [{
+		id: payload01.comment_id,
+		text: payload01.text default "",
+		postedDate: payload01.posted_date as String default ""
+	}]
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="postAccountsPostFlow" doc:id="32a86cb4-e464-45fd-bbef-19e6be5c8668" >
+		<db:insert doc:name="Insert" doc:id="ed9a8ad0-5712-4b04-914a-58c160036297" config-ref="Database_Config">
+			<db:sql >Insert into post (title, body, create_date, categories_id, user_id)
+values (#[json:title], #[json:title], timestamp, #[json:categoties_id], #[json:user_id])</db:sql>
+		</db:insert>
+		<set-payload value="Post with title - #[json:title],  was posted" doc:name="Set Payload" doc:id="58fa693d-adc5-427b-b833-66cd62fbd952" />
+	</flow>
+	<flow name="deleteAccountsPostByIdFlow" doc:id="b11105ea-31c9-4a22-b70f-7453556de0ff" >
+		<db:delete doc:name="Delete" doc:id="be2ca9ba-f10a-4b8f-8ac5-e82ff1dd9f6d" config-ref="Database_Config">
+			<db:sql >Delete from post where id = #[flowVars.id]</db:sql>
+		</db:delete>
+		<set-payload value="Post with id - #[flowVars.id], was deleted" doc:name="Set Payload" doc:id="68d440a9-4f8d-45f7-b6f9-f25e95834d6d" />
+	</flow>
+	<flow name="getAccountsCommentsFlow" doc:id="1318fbff-468c-418f-9365-7a1ffeda1d7d" >
+		<db:select doc:name="Select" doc:id="e3910ba9-99d5-47cc-8875-d665efca5b23" config-ref="Database_Config">
+			<db:sql >Select * 
+From comment
+Where user_id = 1</db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="6679bb8c-6f4d-45bf-bb9b-7298820865ac" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	id: payload01.id,
+	text: payload01.text default "",
+	postedDate: payload01.posted_date as String default "",
+	postId: payload01.post_id,
+	userId: payload01.user_id
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getAccountsCommentByIdFlow" doc:id="9271c577-e5c9-4a60-87e8-bb6488d3867f" >
+		<db:select doc:name="Select" doc:id="efcaabd4-09c5-4aae-af1d-a6dafa405cb1" config-ref="Database_Config">
+			<db:sql >Select *
+From comment
+Where user_id = 1 and id = 1;</db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="82fa2adb-448f-4cda-9fa6-c2951597a8c0" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	id: payload01.id,
+	text: payload01.text default "",
+	postedDate: payload01.posted_date as String default "",
+	postId: payload01.post_id,
+	userId: payload01.user_id
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="postAccountsCommentFlow" doc:id="b9e01dbe-3870-43ab-9385-771e4a6f0938" >
+		<db:insert doc:name="Insert" doc:id="875b7a46-34ab-440c-b3c8-261e50c4263b" config-ref="Database_Config">
+			<db:sql >Insert into comment (post_id, posted_date, text, user_id)
+values (#[json:postId], timestamp, #[json:text], #[json:user_id])</db:sql>
+		</db:insert>
+		<set-payload value="Comment was added" doc:name="Set Payload" doc:id="d488ed3a-ce68-4bc4-95b5-0747800c7e63" />
+	</flow>
+	<flow name="deleteAccountsCommentByIdFlow" doc:id="d8fe4593-9842-48f2-8fdb-206baa815951" >
+		<db:delete doc:name="Delete" doc:id="5de97b3f-af93-439f-857c-3343e0fee929" config-ref="Database_Config">
+			<db:sql >Delete from comments where id = #[flowVars.id]</db:sql>
+		</db:delete>
+		<set-payload value="Comment with id - #[flowVars.id], was deleted;" doc:name="Set Payload" doc:id="49ed8461-1704-4e0c-a80b-ff11d268ca58" />
+	</flow>
+</mule>

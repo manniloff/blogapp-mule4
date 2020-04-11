@@ -1,0 +1,16 @@
+ [
+ {
+    "id": 1,
+    "text": "test comment",
+    "postedDate": "2020-01-29T08:24:30.000+0000",
+    "postId": 2,
+    "userId": 1
+ },
+ {
+    "id": 2,
+    "text": "test comment",
+    "postedDate": "2020-01-29T08:24:30.000+0000",
+    "postId": 3,
+    "userId": 2
+ }
+]
